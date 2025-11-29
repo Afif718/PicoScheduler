@@ -2,14 +2,15 @@
 
 **Offline Device Task Scheduler for Raspberry Pi Pico W**
 
-PicoScheduler is a fully offline automation system built for the Raspberry Pi Pico W. It enables you to control GPIO devices and schedule tasks through a simple web interface—all without requiring internet connectivity, external servers, or a router. The system stores all tasks and device configurations in JSON files, ensuring your setup persists across reboots.
+PicoScheduler is a fully offline automation system built for the Raspberry Pi Pico W. It enables you to control GPIO devices and schedule tasks through a simple web interface—all without requiring internet connectivity, external servers, or a router. The system stores all tasks, device configurations, and persisted time in JSON files, ensuring your setup survives reboots.
 
 ## Features
 
 - **Fully Offline Operation** — Functions independently without internet, router, or cloud services
 - **Browser-Based Interface** — The Pico W creates a Wi-Fi Access Point for direct browser control
-- **Persistent Storage** — Tasks and devices are stored in JSON files and survive power loss
+- **Persistent Storage** — Tasks, devices, and RTC time are stored in JSON files and survive power loss
 - **GPIO Device Control** — Compatible with LEDs, relays, pumps, motors, and other GPIO-controlled devices
+- **Single Task per Device** — Prevents multiple overlapping tasks for the same device
 - **Flexible Task Management** — Create and delete one-time or daily recurring schedules
 - **Dynamic Device Creation** — Add new devices directly from the UI without code modifications
 - **Automatic Time Synchronization** — Receives local time from your browser on connection
@@ -29,7 +30,7 @@ The Raspberry Pi Pico W does not include a hardware Real-Time Clock (RTC). PicoS
 2. The Pico sets its internal clock based on this synchronized time
 3. After synchronization, the Pico maintains time offline using MicroPython's millisecond timer (`utime.ticks_ms()`)
 4. In the event of power loss, the Pico resets to 00:00 until you reconnect to the interface
-5. Once reconnected, time accuracy is restored and maintained
+5. The Pico persists the last set time in `time.json` so it can restore the RTC on next boot
 
 This design eliminates the need for internet connectivity, NTP servers, or external RTC hardware.
 
@@ -37,7 +38,7 @@ This design eliminates the need for internet connectivity, NTP servers, or exter
 
 - Immediate offline functionality
 - No network infrastructure required
-- Persistent device and task storage
+- Persistent device, task, and time storage
 - Built on MicroPython for easy customization
 - Ideal for automation in remote locations, agricultural applications, laboratory equipment, and offline IoT projects
 
@@ -58,6 +59,7 @@ PicoScheduler/
 ├── main.py          # Web server, scheduler, and GPIO control logic
 ├── tasks.json       # Auto-generated persistent task storage
 ├── devices.json     # Auto-generated persistent device storage
+├── time.json        # Auto-generated RTC persistence storage
 ├── README.md        
 └── LICENSE
 ```
@@ -70,7 +72,7 @@ Download the latest MicroPython firmware for Pico W and flash it using BOOTSEL m
 
 ### 2. Upload Project Files
 
-Upload `main.py` to your Pico W using Thonny or your preferred method. The `tasks.json` and `devices.json` files will be generated automatically on first run.
+Upload `main.py` to your Pico W using Thonny or your preferred method. The `tasks.json`, `devices.json`, and `time.json` files will be generated automatically on first run.
 
 ### 3. Run the System
 
@@ -88,7 +90,7 @@ Upload `main.py` to your Pico W using Thonny or your preferred method. The `task
 Displays the synchronized local time provided by your browser.
 
 ### Task Management
-- Create new scheduled tasks
+- Create new scheduled tasks (one task per device enforced)
 - Delete existing tasks
 - Configure one-time or daily recurring schedules
 
@@ -103,6 +105,7 @@ All data is stored locally on the Pico W:
 
 - `tasks.json` — Stores all scheduled tasks
 - `devices.json` — Stores all device configurations
+- `time.json` — Stores last synchronized time for RTC restoration
 
 Files are updated immediately upon any changes, ensuring data integrity even in the event of unexpected power loss.
 
@@ -119,14 +122,12 @@ Pico W
 
 1. Add device: "Bedroom Lamp" on GPIO 15
 2. Create schedule: Turn ON at 18:00, Turn OFF at 22:00
-3. Set to repeat daily
-4. System runs indefinitely offline after initial time synchronization
+3. System runs indefinitely offline after initial time synchronization
 
 ## Important Notes
 
 - Time tracking resets to 00:00 after power loss until the next interface connection
-- After reconnection, the Pico maintains accurate time using its internal timer
-- For absolute time persistence across power cycles, consider adding an external RTC module (e.g., DS3231)
+- After reconnection, the Pico restores accurate time from `time.json` and maintains it offline
 - Device configurations and task data remain saved regardless of power loss
 
 ## Future Development Roadmap
