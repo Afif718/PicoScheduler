@@ -2,6 +2,7 @@ import network
 import socket
 import time
 import ujson as json
+import machine
 from machine import Pin
 
 # -----------------------------
@@ -9,6 +10,7 @@ from machine import Pin
 # -----------------------------
 TASK_FILE = "tasks.json"
 DEVICE_FILE = "devices.json"
+TIME_FILE = "time.json"
 AP_SSID = "PicoW_Scheduler"
 AP_PASSWORD = "12345678"
 
@@ -53,6 +55,31 @@ for d in devices:
 
 # Mapping devices to displayed action
 DEVICE_ACTION = {d["name"]: f"{d['name']} ON" for d in devices}
+
+# -----------------------------
+# Try to restore persisted time (if any)
+# -----------------------------
+def restore_persisted_time():
+    try:
+        with open(TIME_FILE, "r") as f:
+            data = json.load(f)
+        # Expecting list/tuple like [year, month, mday, weekday, hour, minute, second, subseconds]
+        if isinstance(data, list) and len(data) >= 7:
+            # adapt to rtc.datetime format: (year, month, mday, weekday, hour, minute, second, subseconds)
+            dt = (data[0], data[1], data[2], data[3] if len(data) > 3 else 0,
+                  data[4] if len(data) > 4 else 0, data[5] if len(data) > 5 else 0,
+                  data[6] if len(data) > 6 else 0, 0)
+            try:
+                rtc = machine.RTC()
+                rtc.datetime(dt)
+                print("Restored persisted time from", TIME_FILE, "->", dt)
+            except Exception as e:
+                print("Failed to restore RTC:", e)
+    except Exception:
+        # no persisted time - ignore
+        pass
+
+restore_persisted_time()
 
 # -----------------------------
 # Wi-Fi AP Setup
@@ -219,6 +246,15 @@ def web_page(current_time):
     <div class='footer'>Developed by M. H. A. Afif</div>
 
     <script>
+    // on page load send local browser time once to Pico (so Pico persists it)
+    window.onload = function() {{
+        try {{
+            const now = new Date();
+            // send hh and mm - Pico will persist full rtc.datetime with current date + these hh/mm
+            fetch(`/settime?hh=${{now.getHours()}}&mm=${{now.getMinutes()}}`);
+        }} catch(e){{}}
+    }};
+
     function updateTable() {{
         fetch("/status")
             .then(response => response.text())
@@ -228,6 +264,7 @@ def web_page(current_time):
     }}
     setInterval(updateTable, 5000);
     </script>
+
     </body></html>
 """.format(task_table=status_table(current_time))
 
@@ -281,8 +318,57 @@ while True:
     # Web request handling
     try:
         conn, addr = s.accept()
-        request = conn.recv(2048)
+        request = conn.recv(4096)
         if not request:
+            conn.close()
+            continue
+
+        # Parse request line once
+        try:
+            request_line = request.split(b'\r\n')[0].decode()
+            path = request_line.split(" ")[1]  # e.g. /settime?hh=12&mm=34
+        except:
+            path = "/"
+
+        # --- Handle settime from browser (GET) ---
+        if request.startswith(b"GET") and path.startswith("/settime"):
+            try:
+                # parse hh and mm
+                hh = None
+                mm = None
+                if "hh=" in path:
+                    hh = int(path.split("hh=")[1].split("&")[0])
+                if "mm=" in path:
+                    mm = int(path.split("mm=")[1].split("&")[0])
+                if hh is not None and mm is not None:
+                    # build rtc.datetime tuple using current date but new hh/mm
+                    lt = list(time.localtime())  # [yr,mon,mday,hh,mm,ss,wd,yd]
+                    year = lt[0]
+                    month = lt[1]
+                    mday = lt[2]
+                    # weekday: MicroPython RTC expects 0-6 (Mon=0?) Some ports use 1-7. We'll keep current weekday value.
+                    weekday = lt[6] if len(lt) > 6 else 0
+                    sec = 0
+                    rtc_tuple = (year, month, mday, weekday, hh, mm, sec, 0)
+                    try:
+                        rtc = machine.RTC()
+                        rtc.datetime(rtc_tuple)
+                        # persist the rtc tuple so after reboot Pico can restore it
+                        try:
+                            with open(TIME_FILE, "w") as tf:
+                                json.dump(list(rtc_tuple), tf)
+                        except Exception as e:
+                            print("Failed to write time file:", e)
+                        print("Time set via browser and persisted:", rtc_tuple)
+                        conn.send(b'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nOK')
+                    except Exception as e:
+                        print("Failed to set RTC:", e)
+                        conn.send(b'HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\n\r\nFAIL')
+                else:
+                    conn.send(b'HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\nMISSING')
+            except Exception as e:
+                print("Error handling /settime:", e)
+                conn.send(b'HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\n\r\nFAIL')
             conn.close()
             continue
 
@@ -296,11 +382,6 @@ while True:
 
         if request.startswith(b"POST"):
             form = parse_post(request)
-            try:
-                request_line = request.split(b'\r\n')[0].decode()
-                path = request_line.split(" ")[1]
-            except:
-                path = "/"
 
             # Delete a scheduled task
             if path == "/delete":
@@ -387,5 +468,4 @@ while True:
         conn.close()
     except OSError:
         pass
-
 
