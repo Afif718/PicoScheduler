@@ -19,9 +19,9 @@ ALLOWED_GPIO = [0, 1, 2, 3, 4, 5, 12, 13, 14, 15]
 led = Pin("LED", Pin.OUT)
 REAL_DEVICE_NAME = "Pi LED"
 
-# -----------------------------
+# -------------------------------
 # Load or initialize tasks/devices
-# -----------------------------
+# -------------------------------
 def load_json_file(filename, default):
     try:
         with open(filename, "r") as f:
