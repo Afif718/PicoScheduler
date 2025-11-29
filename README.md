@@ -8,6 +8,7 @@ A lightweight, fully offline task scheduler for controlling devices using the Ra
 <img width="401" height="436" alt="image" src="https://github.com/user-attachments/assets/a3e790b4-123b-4823-b4ff-383d9e6f84b1" />
 <img width="306" height="440" alt="image" src="https://github.com/user-attachments/assets/9e4fbe12-5790-41f4-b925-773df019d524" />
 <img width="413" height="441" alt="image" src="https://github.com/user-attachments/assets/201f9fb6-e92e-4c94-9cc6-12051a3f5504" />
+<img width="326" height="433" alt="image" src="https://github.com/user-attachments/assets/9c222f1f-ce7b-46d3-9bef-88cc4ab3c36c" />
 
 
 ---
