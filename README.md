@@ -19,7 +19,6 @@ PicoScheduler is a fully offline automation system built for the Raspberry Pi Pi
 <img width="234" height="442" alt="image" src="https://github.com/user-attachments/assets/58bcbc6e-dc4c-48c7-9e9a-764de01724d5" />
 <img width="401" height="442" alt="image" src="https://github.com/user-attachments/assets/a3e790b4-123b-4823-b4ff-383d9e6f84b1" />
 <img width="250" height="442" alt="image" src="https://github.com/user-attachments/assets/e2c6ece3-47d1-4c02-8991-b003bade35e2" />
-<img width="250" height="442" alt="image" src="https://github.com/user-attachments/assets/201f9fb6-e92e-4c94-9cc6-12051a3f5504" />
 <img width="250" height="250" alt="image" src="https://github.com/user-attachments/assets/9c222f1f-ce7b-46d3-9bef-88cc4ab3c36c" />
 
 ## Time Management System
