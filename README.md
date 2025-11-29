@@ -16,7 +16,7 @@ PicoScheduler is a fully offline automation system built for the Raspberry Pi Pi
 - **Automatic Time Synchronization** — Receives local time from your browser on connection
 - **Internal Time Tracking** — Maintains accurate time using MicroPython's internal timer after initial sync
 
-<img width="250" height="250" alt="image" src="https://github.com/user-attachments/assets/e7959a91-e4ba-4dcc-85b0-44e75b23fafd" />
+<img width="234" height="442" alt="image" src="https://github.com/user-attachments/assets/58bcbc6e-dc4c-48c7-9e9a-764de01724d5" />
 <img width="401" height="250" alt="image" src="https://github.com/user-attachments/assets/a3e790b4-123b-4823-b4ff-383d9e6f84b1" />
 <img width="250" height="250" alt="image" src="https://github.com/user-attachments/assets/e2c6ece3-47d1-4c02-8991-b003bade35e2" />
 <img width="250" height="250" alt="image" src="https://github.com/user-attachments/assets/201f9fb6-e92e-4c94-9cc6-12051a3f5504" />
