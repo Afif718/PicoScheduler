@@ -1,9 +1,19 @@
 # PicoScheduler
 
-> **Offline Device Task Scheduler for Raspberry Pi Pico W**
+**Offline Device Task Scheduler for Raspberry Pi Pico W**
 
-A lightweight, fully offline task scheduler for controlling devices using the Raspberry Pi Pico W. Designed for smart home, lab, and IoT projects, PicoScheduler allows you to schedule tasks, control GPIO devices, and manage everything entirely offline with persistent data storage.
+PicoScheduler is a fully offline automation system built for the Raspberry Pi Pico W. It enables you to control GPIO devices and schedule tasks through a simple web interface—all without requiring internet connectivity, external servers, or a router. The system stores all tasks and device configurations in JSON files, ensuring your setup persists across reboots.
 
+## Features
+
+- **Fully Offline Operation** — Functions independently without internet, router, or cloud services
+- **Browser-Based Interface** — The Pico W creates a Wi-Fi Access Point for direct browser control
+- **Persistent Storage** — Tasks and devices are stored in JSON files and survive power loss
+- **GPIO Device Control** — Compatible with LEDs, relays, pumps, motors, and other GPIO-controlled devices
+- **Flexible Task Management** — Create and delete one-time or daily recurring schedules
+- **Dynamic Device Creation** — Add new devices directly from the UI without code modifications
+- **Automatic Time Synchronization** — Receives local time from your browser on connection
+- **Internal Time Tracking** — Maintains accurate time using MicroPython's internal timer after initial sync
 
 <img width="401" height="250" alt="image" src="https://github.com/user-attachments/assets/a3e790b4-123b-4823-b4ff-383d9e6f84b1" />
 <img width="250" height="250" alt="image" src="https://github.com/user-attachments/assets/e2c6ece3-47d1-4c02-8991-b003bade35e2" />
@@ -11,181 +21,136 @@ A lightweight, fully offline task scheduler for controlling devices using the Ra
 <img width="290" height="350" alt="image" src="https://github.com/user-attachments/assets/2c194198-8053-4f75-8f45-f5d5997e177b" />
 <img width="250" height="250" alt="image" src="https://github.com/user-attachments/assets/9c222f1f-ce7b-46d3-9bef-88cc4ab3c36c" />
 
+## Time Management System
 
----
+The Raspberry Pi Pico W does not include a hardware Real-Time Clock (RTC). PicoScheduler addresses this through a hybrid approach:
 
-## ✨ Features
+1. When you open the web interface, your browser transmits the current local time to the Pico
+2. The Pico sets its internal clock based on this synchronized time
+3. After synchronization, the Pico maintains time offline using MicroPython's millisecond timer (`utime.ticks_ms()`)
+4. In the event of power loss, the Pico resets to 00:00 until you reconnect to the interface
+5. Once reconnected, time accuracy is restored and maintained
 
-- **🔌 Offline Scheduling**: Runs entirely on the Pico W without Wi-Fi or external servers
-- **💾 Persistent Storage**: All tasks and device configurations stored in JSON files, retained across power cycles
-- **🌐 Web Interface**: Lightweight HTML interface served directly by the Pico W
-- **🎛️ Device Control**: Easy GPIO control for LEDs, relays, and custom circuits
-- **📅 Task Management**: Add, delete, and monitor scheduled tasks
-- **⚡ Automatic Switching**: Devices turn on/off automatically based on schedule
-- **🔧 Dynamic Devices**: Add new GPIO devices without modifying code
-- **⏰ Built-in RTC**: Uses Pico W's real-time clock for reliable offline time tracking
+This design eliminates the need for internet connectivity, NTP servers, or external RTC hardware.
 
----
+## Why Choose PicoScheduler?
 
-## 🎯 Why Raspberry Pi Pico (Raspberry Pi Pico W with RP2040)?
+- Immediate offline functionality
+- No network infrastructure required
+- Persistent device and task storage
+- Built on MicroPython for easy customization
+- Ideal for automation in remote locations, agricultural applications, laboratory equipment, and offline IoT projects
 
-- **Built-in RTC**: Unlike ESP32, the Pico W has a real-time clock peripheral for offline scheduling
-- **Cost-effective**: Low-cost microcontroller with multiple GPIOs
-- **Offline Operation**: Perfect for environments without network access
-- **Ease of Use**: Simple Python programming with MicroPython
-- **Reliable**: No dependency on Wi-Fi or cloud services
+## Use Cases
 
----
+- Home automation (lighting, ventilation, relay control)
+- Agricultural irrigation and grow room automation
+- Laboratory equipment timing and control
+- Offline IoT automation projects
+- Educational and student projects
+- Timed relay-based systems
 
-## 🚀 Use Cases
-
-- **🏠 Smart Home Automation**: Control lights, fans, or appliances automatically
-- **🔬 Lab Experiments**: Schedule power for sensors, heaters, or pumps
-- **🌱 Plant Irrigation**: Water plants on daily or one-time schedules without internet
-- **🤖 IoT Prototyping**: Build offline IoT devices with persistent task management
-- **📚 Educational Projects**: Demonstrate scheduling and automation concepts
-
----
-
-## 📂 File Structure
+## Project Structure
 
 ```
 PicoScheduler/
 │
-├── main.py          # Main MicroPython script for web server and scheduling
-├── tasks.json       # Stored scheduled tasks (auto-created)
-├── devices.json     # Stored devices (auto-created)
-├── README.md        # Project documentation
-└── LICENSE          # License file
+├── main.py          # Web server, scheduler, and GPIO control logic
+├── tasks.json       # Auto-generated persistent task storage
+├── devices.json     # Auto-generated persistent device storage
+├── README.md        
+└── LICENSE
 ```
 
----
+## Setup Instructions
 
-## 🛠️ Setup Instructions
+### 1. Flash MicroPython Firmware
 
-### 1. Flash MicroPython
+Download the latest MicroPython firmware for Pico W and flash it using BOOTSEL mode.
 
-1. Download the latest MicroPython firmware for Pico W from [micropython.org](https://micropython.org/download/RPI_PICO_W/)
-2. Hold the BOOTSEL button on your Pico W and connect it to your computer via USB
-3. Drag and drop the `.uf2` firmware file to the RPI-RP2 drive
-4. The Pico W will reboot and appear as a USB serial device
+### 2. Upload Project Files
 
-### 2. Upload Files
+Upload `main.py` to your Pico W using Thonny or your preferred method. The `tasks.json` and `devices.json` files will be generated automatically on first run.
 
-1. Use Thonny IDE or `ampy` to upload `main.py` to your Pico W
-2. `tasks.json` and `devices.json` will be created automatically on first run
+### 3. Run the System
 
-### 3. Configure and Run
+1. Power up the Pico W
+2. Connect to the Access Point:
+   - **SSID:** `PicoW_Scheduler`
+   - **Password:** `12345678`
+3. Open your browser and navigate to: `http://192.168.4.1`
+4. Your browser will automatically send the current time to the Pico
+5. The system is now fully operational offline
 
-1. Power on the Pico W
-2. Connect to the Pico W's Wi-Fi access point:
-   - **SSID**: `PicoW_Scheduler`
-   - **Password**: `12345678`
-3. Open a browser and navigate to `http://192.168.4.1`
-4. Start adding devices and scheduling tasks!
+## Web Interface Overview
 
----
-
-## 🖥️ Web Interface Features
-
-### Current Time Display
-Shows the Pico W's internal RTC time in real-time.
+### Time Display
+Displays the synchronized local time provided by your browser.
 
 ### Task Management
-- **Task Table**: View all scheduled tasks with start/end times and recurrence settings
-- **Add Task**: Create new tasks with start time, end time, and recurrence options (once or daily)
-- **Delete Task**: Remove individual tasks with a single click
+- Create new scheduled tasks
+- Delete existing tasks
+- Configure one-time or daily recurring schedules
 
 ### Device Management
-- **Device List**: View all registered GPIO devices
-- **Add Device**: Add new GPIO devices dynamically by specifying name and pin number
-- **Delete Device**: Remove user-added devices (and their associated tasks)
+- Add devices by specifying name and GPIO pin
+- Control relays and LEDs directly
+- Remove user-added devices
 
----
+## Data Persistence
 
-## 📊 Data Persistence
+All data is stored locally on the Pico W:
 
-All data is automatically saved to JSON files:
+- `tasks.json` — Stores all scheduled tasks
+- `devices.json` — Stores all device configurations
 
-- **tasks.json**: Stores all scheduled tasks
-- **devices.json**: Stores all device configurations
+Files are updated immediately upon any changes, ensuring data integrity even in the event of unexpected power loss.
 
-Files are updated immediately when tasks or devices are added/deleted, ensuring no data loss during power outages.
-
----
-
-## 🔌 Hardware Setup Example
+## Hardware Example
 
 ```
-Raspberry Pi Pico W
+Pico W
 │
-├── GPIO 15 ──────> LED (via 220Ω resistor) ──> GND
-├── GPIO 14 ──────> Relay Module IN ──> Control Device
-└── GND ──────────> Common Ground
+├── GPIO 15 → LED/Relay
+└── GND
 ```
 
----
+## Example Automation Workflow
 
-## 📝 Usage Example
+1. Add device: "Bedroom Lamp" on GPIO 15
+2. Create schedule: Turn ON at 18:00, Turn OFF at 22:00
+3. Set to repeat daily
+4. System runs indefinitely offline after initial time synchronization
 
-1. **Add a Device**:
-   - Name: `Bedroom Light`
-   - GPIO Pin: `15`
+## Important Notes
 
-2. **Schedule a Task**:
-   - Device: `Bedroom Light`
-   - Start Time: `18:00`
-   - End Time: `22:00`
-   - Recurrence: `Daily`
+- Time tracking resets to 00:00 after power loss until the next interface connection
+- After reconnection, the Pico maintains accurate time using its internal timer
+- For absolute time persistence across power cycles, consider adding an external RTC module (e.g., DS3231)
+- Device configurations and task data remain saved regardless of power loss
 
-3. The light will automatically turn on at 6 PM and off at 10 PM every day!
+## Future Development Roadmap
 
----
+- Hardware RTC module support
+- Enhanced UI design
+- Weekly and monthly scheduling options
+- Sensor integration and conditional automation
+- Task execution logging
+- Backup and restore utilities
 
-## ⚠️ Important Notes
+## Contributing
 
-- The built-in RTC requires the Pico W to remain powered. For time persistence across power cycles, consider adding a battery-backed external RTC module (e.g., DS3231)
-- Fully offline—no Wi-Fi or cloud dependency required for operation
-- All changes are immediately written to JSON files for persistence
-- Access point mode allows direct connection without requiring a router
+Contributions are welcome. Please submit pull requests or open issues for bugs and feature requests.
 
----
+## License
 
-## 🔮 Future Improvements
+This project is licensed under the MIT License.
 
-- [ ] Battery-backed RTC support for absolute time persistence
-- [ ] Task import/export via USB
-- [ ] Notification system using buzzer or LED indicators
-- [ ] Support for advanced recurrence rules (weekly, monthly patterns)
-- [ ] Web interface styling improvements
-- [ ] Task logging and history
-- [ ] Support for analog sensors and conditional triggers
+## Acknowledgments
 
----
+- MicroPython
+- Raspberry Pi Foundation
 
-## 🤝 Contributing
+## Support
 
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- Built with [MicroPython](https://micropython.org/)
-- Designed for the [Raspberry Pi Pico W](https://www.raspberrypi.com/products/raspberry-pi-pico/)
-
----
-
-## 📧 Contact
-
-For questions, suggestions, or feedback, please open an issue on GitHub.
-
----
-
-**⭐ If you find this project useful, please consider giving it a star!**
+If you find this project useful, please consider starring the repository on GitHub.
