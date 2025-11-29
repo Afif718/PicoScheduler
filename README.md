@@ -27,7 +27,7 @@ A lightweight, fully offline task scheduler for controlling devices using the Ra
 
 ---
 
-## 🎯 Why Raspberry Pi Pico W?
+## 🎯 Why Raspberry Pi Pico (Raspberry Pi Pico W with RP2040)?
 
 - **Built-in RTC**: Unlike ESP32, the Pico W has a real-time clock peripheral for offline scheduling
 - **Cost-effective**: Low-cost microcontroller with multiple GPIOs
